@@ -6,12 +6,12 @@ import { tracks } from '../../content/tracks';
 import { lessons } from '../../content/lessons/index';
 import { getDailyQuote } from '../../content/quotes';
 
-const iconBgMap = {
-  accent: 'bg-accent',
-  historical: 'bg-historical',
-  insight: 'bg-insight',
-  application: 'bg-application',
-  warning: 'bg-warning',
+const trackAccents = {
+  accent: 'text-accent',
+  historical: 'text-historical',
+  insight: 'text-insight',
+  application: 'text-application',
+  warning: 'text-warning',
 };
 
 export default function Dashboard() {
@@ -36,193 +36,163 @@ export default function Dashboard() {
   }).filter(Boolean);
 
   return (
-    <div className="space-y-14">
-      {/* Hero quote */}
+    <div>
+      {/* Quote */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center pt-2 pb-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16"
       >
-        <h1 className="text-[2.2rem] font-medium text-text mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
+        <h1 className="text-[2.4rem] font-medium text-text mb-6" style={{ fontFamily: 'var(--font-heading)' }}>
           Welcome back
         </h1>
-        <blockquote className="max-w-lg mx-auto">
-          <p className="text-text-secondary italic text-[1.05rem] leading-relaxed" style={{ fontFamily: 'var(--font-body)' }}>
+        <blockquote className="max-w-md mx-auto">
+          <p className="text-text-secondary italic text-[1.05rem] leading-[1.8]" style={{ fontFamily: 'var(--font-body)' }}>
             &ldquo;{quote.text}&rdquo;
           </p>
-          <footer className="text-text-muted text-sm mt-3 not-italic tracking-wide" style={{ fontFamily: 'var(--font-ui)' }}>
+          <footer className="text-text-muted text-[0.85rem] mt-3 not-italic" style={{ fontFamily: 'var(--font-ui)' }}>
             &mdash; {quote.author}
           </footer>
         </blockquote>
       </motion.div>
 
-      {/* Stats */}
+      {/* Progress summary — single horizontal line */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-5"
+        className="flex items-center justify-center gap-8 sm:gap-12 text-center mb-16 py-6 border-y border-border/50"
       >
-        <StatCard label="Day Streak" value={stats.streak.current} sub={`Best: ${stats.streak.best}`} />
-        <StatCard label="Lessons Done" value={stats.completedLessons} sub={`of ${lessons.length}`} />
-        <StatCard label="Problems Solved" value={stats.solvedProblems} sub={`${stats.totalAttempts} attempts`} />
-        <StatCard label="Review Due" value={dueCount} sub={dueCount > 0 ? 'Cards waiting' : 'All caught up'} />
+        <ProgressStat value={stats.streak.current} label="Day streak" />
+        <ProgressStat value={stats.completedLessons} label={`of ${lessons.length} lessons`} />
+        <ProgressStat value={stats.solvedProblems} label="Problems solved" />
+        {dueCount > 0 && <ProgressStat value={dueCount} label="Cards due" accent />}
       </motion.div>
 
-      {/* Two columns */}
-      <div className="grid md:grid-cols-2 gap-10">
-        {/* Continue learning */}
+      {/* Review prompt */}
+      {dueCount > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+          className="mb-16"
+        >
+          <Link
+            to="/review"
+            className="block text-center py-5 border border-accent/25 rounded-lg bg-accent/[0.04] hover:bg-accent/[0.08] transition-colors no-underline"
+          >
+            <p className="text-accent font-medium text-[1.05rem]" style={{ fontFamily: 'var(--font-heading)' }}>
+              {dueCount} review card{dueCount !== 1 ? 's' : ''} waiting &rarr;
+            </p>
+          </Link>
+        </motion.div>
+      )}
+
+      {/* Continue where you left off */}
+      {inProgressLessons.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
+          className="mb-16"
         >
-          <h2 className="text-[1.35rem] font-medium text-text mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
-            Continue Learning
+          <h2 className="text-[1.1rem] font-medium text-text-muted uppercase tracking-[0.1em] mb-6" style={{ fontFamily: 'var(--font-ui)', fontSize: '0.8rem' }}>
+            Continue where you left off
           </h2>
-          {inProgressLessons.length > 0 ? (
-            <div className="space-y-4">
-              {inProgressLessons.map(lesson => {
-                const track = tracks.find(t => t.id === lesson.track);
-                const p = lessonProgress[lesson.id];
-                const progressPct = Math.round((p.lastBlock / lesson.blocks.length) * 100);
-                return (
-                  <Link
-                    key={lesson.id}
-                    to={`/lesson/${lesson.track}/${lesson.id}`}
-                    className="block px-5 py-5 bg-surface border border-border/60 rounded-lg hover:shadow-sm transition-all duration-200 no-underline"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className={`w-11 h-11 rounded-md flex items-center justify-center text-white text-[1.1rem] shrink-0 ${iconBgMap[track?.color || 'accent']}`}>
-                        {track?.icon}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-text truncate" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem' }}>{lesson.title}</p>
-                        <p className="text-sm text-text-muted mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>{track?.title}</p>
-                      </div>
-                      <span className="text-sm text-accent font-medium" style={{ fontFamily: 'var(--font-ui)' }}>{progressPct}%</span>
-                    </div>
-                    <div className="mt-4 h-[3px] bg-bg-tertiary rounded-full overflow-hidden">
-                      <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${progressPct}%` }} />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="px-6 py-10 bg-surface border border-border/60 rounded-lg text-center">
-              <p className="text-text-secondary" style={{ fontFamily: 'var(--font-body)' }}>No lessons in progress.</p>
-              <Link to="/curriculum" className="text-accent font-medium mt-3 inline-block no-underline hover:underline" style={{ fontFamily: 'var(--font-ui)' }}>
-                Start a track &rarr;
-              </Link>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Right column */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          className="space-y-10"
-        >
-          {dueCount > 0 && (
-            <div>
-              <h2 className="text-[1.35rem] font-medium text-text mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
-                Spaced Review
-              </h2>
-              <Link
-                to="/review"
-                className="flex items-center gap-4 px-5 py-5 bg-surface border border-accent/20 rounded-lg hover:shadow-sm transition-all duration-200 no-underline"
-              >
-                <span className="w-11 h-11 rounded-md bg-accent flex items-center justify-center text-white text-lg shrink-0">↻</span>
-                <div>
-                  <p className="font-medium text-text" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem' }}>
-                    {dueCount} card{dueCount !== 1 ? 's' : ''} due
-                  </p>
-                  <p className="text-sm text-text-muted mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>Keep your knowledge fresh</p>
-                </div>
-              </Link>
-            </div>
-          )}
-
-          <div>
-            <h2 className="text-[1.35rem] font-medium text-text mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
-              Quick Start
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {nextLessons.slice(0, 4).map(({ track, lesson }) => (
+          <div className="space-y-1">
+            {inProgressLessons.map(lesson => {
+              const track = tracks.find(t => t.id === lesson.track);
+              const p = lessonProgress[lesson.id];
+              const progressPct = Math.round((p.lastBlock / lesson.blocks.length) * 100);
+              return (
                 <Link
                   key={lesson.id}
-                  to={`/lesson/${track.id}/${lesson.id}`}
-                  className="px-5 py-5 bg-surface border border-border/60 rounded-lg hover:shadow-sm hover:border-accent/30 transition-all duration-200 no-underline group"
+                  to={`/lesson/${lesson.track}/${lesson.id}`}
+                  className="flex items-center gap-4 py-4 px-1 border-b border-border/30 hover:bg-surface-hover transition-colors no-underline group -mx-1 rounded"
+                  style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
                 >
-                  <span className="text-[1.6rem]">{track.icon}</span>
-                  <p className="font-medium text-text mt-2.5 group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem' }}>
-                    {track.title}
-                  </p>
-                  <p className="text-[0.8rem] text-text-muted truncate mt-1" style={{ fontFamily: 'var(--font-ui)' }}>{lesson.title}</p>
+                  <span className={`text-[1.3rem] shrink-0 ${trackAccents[track?.color || 'accent']}`}>{track?.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-text font-medium group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem' }}>
+                      {lesson.title}
+                    </p>
+                    <p className="text-[0.82rem] text-text-muted mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>
+                      {track?.title} &middot; {progressPct}% complete
+                    </p>
+                  </div>
+                  <svg className="w-4 h-4 text-text-muted group-hover:text-accent transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </motion.div>
-      </div>
+        </motion.section>
+      )}
 
-      {/* All tracks */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
+      {/* Tracks menu */}
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
+        transition={{ delay: 0.25, duration: 0.5 }}
       >
-        <h2 className="text-[1.35rem] font-medium text-text mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
-          Your Tracks
+        <h2 className="text-[0.8rem] font-medium text-text-muted uppercase tracking-[0.1em] mb-6" style={{ fontFamily: 'var(--font-ui)' }}>
+          Tracks
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tracks.map(track => {
+        <div className="space-y-1">
+          {nextLessons.map(({ track, lesson }) => {
             const trackLessons = lessons.filter(l => l.track === track.id);
             const completed = trackLessons.filter(l => lessonProgress[l.id]?.completed).length;
-            const pct = trackLessons.length > 0 ? Math.round((completed / trackLessons.length) * 100) : 0;
             return (
               <Link
                 key={track.id}
-                to={`/curriculum?track=${track.id}`}
-                className="px-6 py-6 bg-surface border border-border/60 rounded-lg hover:shadow-sm hover:border-accent/30 transition-all duration-200 no-underline group"
+                to={`/lesson/${track.id}/${lesson.id}`}
+                className="flex items-center gap-4 py-5 px-1 border-b border-border/30 hover:bg-surface-hover transition-colors no-underline group -mx-1 rounded"
+                style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
               >
-                <div className="flex items-start justify-between">
-                  <span className={`w-12 h-12 rounded-md flex items-center justify-center text-white text-xl ${iconBgMap[track.color]}`}>
-                    {track.icon}
-                  </span>
-                  <span className="text-[11px] px-2.5 py-1 rounded-full bg-bg-tertiary text-text-muted" style={{ fontFamily: 'var(--font-ui)' }}>
-                    {track.difficulty}
-                  </span>
+                <span className={`text-[1.5rem] shrink-0 ${trackAccents[track.color]}`}>{track.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-text font-medium group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem' }}>
+                    {track.title}
+                  </p>
+                  <p className="text-[0.85rem] text-text-secondary mt-0.5" style={{ fontFamily: 'var(--font-body)' }}>
+                    {track.subtitle}
+                  </p>
+                  <p className="text-[0.78rem] text-text-muted mt-1" style={{ fontFamily: 'var(--font-ui)' }}>
+                    Next: {lesson.title} &middot; {completed}/{trackLessons.length} complete
+                  </p>
                 </div>
-                <h3 className="text-text font-semibold mt-4 group-hover:text-accent transition-colors" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.15rem' }}>
-                  {track.title}
-                </h3>
-                <p className="text-text-muted text-sm mt-1" style={{ fontFamily: 'var(--font-ui)' }}>{track.subtitle}</p>
-                <div className="mt-5 flex items-center gap-3">
-                  <div className="flex-1 h-[3px] bg-bg-tertiary rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${iconBgMap[track.color]}`} style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="text-[11px] text-text-muted" style={{ fontFamily: 'var(--font-ui)' }}>{completed}/{trackLessons.length}</span>
-                </div>
+                <svg className="w-4 h-4 text-text-muted group-hover:text-accent transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             );
           })}
         </div>
-      </motion.div>
+
+        {/* Link to full curriculum */}
+        <div className="mt-8 text-center">
+          <Link
+            to="/curriculum"
+            className="text-accent text-[0.9rem] font-medium no-underline hover:underline"
+            style={{ fontFamily: 'var(--font-ui)' }}
+          >
+            View full curriculum &rarr;
+          </Link>
+        </div>
+      </motion.section>
     </div>
   );
 }
 
-function StatCard({ label, value, sub }) {
+function ProgressStat({ value, label, accent }) {
   return (
-    <div className="px-5 py-5 bg-surface border border-border/60 rounded-lg">
-      <span className="text-[1.75rem] font-semibold text-text" style={{ fontFamily: 'var(--font-heading)' }}>{value}</span>
-      <p className="text-sm text-text-secondary mt-1" style={{ fontFamily: 'var(--font-ui)' }}>{label}</p>
-      {sub && <p className="text-[11px] text-text-muted mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>{sub}</p>}
+    <div>
+      <p className={`text-[1.6rem] font-semibold ${accent ? 'text-accent' : 'text-text'}`} style={{ fontFamily: 'var(--font-heading)' }}>
+        {value}
+      </p>
+      <p className="text-[0.75rem] text-text-muted mt-0.5" style={{ fontFamily: 'var(--font-ui)' }}>{label}</p>
     </div>
   );
 }

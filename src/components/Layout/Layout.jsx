@@ -5,7 +5,7 @@ export default function Layout({ dark, toggleTheme }) {
   return (
     <div className="min-h-screen bg-bg">
       <Navbar dark={dark} toggleTheme={toggleTheme} />
-      <main className="pt-28 pb-20 px-6 max-w-5xl mx-auto">
+      <main className="pt-32 pb-24 px-8 sm:px-12 max-w-4xl mx-auto">
         <Outlet />
       </main>
     </div>
