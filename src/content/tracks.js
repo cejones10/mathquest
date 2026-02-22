@@ -1,0 +1,61 @@
+export const tracks = [
+  {
+    id: 'calculus',
+    title: 'Calculus',
+    subtitle: 'The Mathematics of Change',
+    description: 'A fast-paced review from limits to multivariable — focused on the deep ideas, not the rote computation.',
+    icon: '∫',
+    color: 'accent',
+    difficulty: 'Foundation',
+    estimatedHours: 20,
+    prerequisites: [],
+  },
+  {
+    id: 'linear-algebra',
+    title: 'Linear Algebra',
+    subtitle: 'The Geometry of Transformations',
+    description: 'Vectors, matrices, eigenvalues — understood as geometry, not arithmetic. The most broadly useful math you\'ll ever learn.',
+    icon: '⊗',
+    color: 'historical',
+    difficulty: 'Foundation',
+    estimatedHours: 25,
+    prerequisites: [],
+  },
+  {
+    id: 'real-analysis',
+    title: 'Real Analysis',
+    subtitle: 'Making Calculus Rigorous',
+    description: 'The crisis that forced mathematicians to rebuild calculus from scratch. Epsilon-delta proofs, convergence, and the topology of the real line.',
+    icon: 'ε',
+    color: 'insight',
+    difficulty: 'Intermediate',
+    estimatedHours: 30,
+    prerequisites: ['calculus'],
+  },
+  {
+    id: 'abstract-algebra',
+    title: 'Abstract Algebra',
+    subtitle: 'The Science of Symmetry',
+    description: 'Groups, rings, fields — the algebraic structures that unify mathematics. From Galois\'s tragic genius to modern cryptography.',
+    icon: '⊕',
+    color: 'application',
+    difficulty: 'Intermediate',
+    estimatedHours: 30,
+    prerequisites: ['linear-algebra'],
+  },
+  {
+    id: 'competition',
+    title: 'Competition Math',
+    subtitle: 'The Art of Problem Solving',
+    description: 'AMC, AIME, and Putnam-level strategies. Clever counting, number theory, inequalities, and the creative tricks that separate good from great.',
+    icon: '★',
+    color: 'warning',
+    difficulty: 'All Levels',
+    estimatedHours: 40,
+    prerequisites: [],
+  },
+];
+
+export function getTrack(id) {
+  return tracks.find(t => t.id === id);
+}
